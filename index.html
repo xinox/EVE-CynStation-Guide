@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Station Cyno Guide</title>
+<style>
+:root{--bg:#0f1216;--panel:#181d23;--line:#2a313a;--text:#d9dee4;--muted:#8b95a1;--accent:#e0a33a;--red:#d9443b;--orange:#e39a2d;--green:#5fb04a}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f4f5f7;--panel:#fff;--line:#d9dde2;--text:#1d232a;--muted:#5d6773;--accent:#a8670a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:var(--accent)}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 16px}
+.wrap{max-width:1100px;margin:0 auto}
+header .wrap{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+header h1{font-size:18px;margin:0;flex:1 1 auto}
+nav a{margin-right:12px;text-decoration:none;font-size:14px}
+#q{flex:1 1 260px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--text);font-size:15px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:14px;padding:3px 10px;cursor:pointer;font-size:13px}
+.chips button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+main{padding:0 16px 40px}
+section{margin-top:28px}
+section,.card{scroll-margin-top:130px}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.card{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--g);border-radius:8px;margin:6px 0}
+.card[data-r="red"]{--g:var(--red)}.card[data-r="orange"]{--g:var(--orange)}.card[data-r="green"]{--g:var(--green)}
+.card[data-r="red"]{background:color-mix(in srgb,var(--red) 10%,var(--panel))}
+.card summary{display:flex;gap:12px;align-items:center;padding:8px 12px;cursor:pointer;list-style:none}
+.card summary::-webkit-details-marker{display:none}
+.card summary::after{content:"▸";margin-left:auto;color:var(--muted);transition:transform .15s}
+.card[open] summary::after{transform:rotate(90deg)}
+.card summary img{width:48px;height:48px;border-radius:5px;flex:none}
+.card h3{margin:0;font-size:15.5px}
+.body{padding:0 12px 12px}
+.meta{color:var(--muted);font-size:13.5px}
+.meta b{color:var(--text)}
+.badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;font-weight:600;color:#fff;background:var(--g);white-space:nowrap}
+.kick{display:inline-block;padding:1px 8px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:.04em;color:#fff;background:var(--red)}
+.tools{display:flex;gap:8px;margin:8px 0}
+.tools button{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:13px}
+.tools button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-top:10px}
+.shots a{cursor:zoom-in}
+#lb{border:0;padding:0;background:transparent;max-width:100vw;max-height:100vh;cursor:zoom-out}
+#lb::backdrop{background:rgba(0,0,0,.88)}
+#lb img{display:block;max-width:96vw;max-height:92vh;border-radius:6px}
+#lb p{color:#ddd;text-align:center;margin:6px 0 0;font-size:14px}
+th button{all:unset;cursor:pointer;font-weight:600}
+th button::after{content:" ↕";color:var(--muted)}
+tr[data-r="red"] td:first-child{box-shadow:inset 4px 0 var(--red)}tr[data-r="orange"] td:first-child{box-shadow:inset 4px 0 var(--orange)}tr[data-r="green"] td:first-child{box-shadow:inset 4px 0 var(--green)}
+.shots img{width:100%;height:auto;border-radius:6px;display:block}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl{overflow-x:auto}
+.route p{margin:2px 0}
+.jumps{color:var(--muted)}
+.empty{color:var(--muted);font-style:italic}
+mark{background:var(--accent);color:#000;border-radius:2px}
+footer{color:var(--muted);font-size:13px;padding:20px 16px;border-top:1px solid var(--line)}
+@media (max-width:560px){.head img{width:64px;height:64px}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>Station Cyno Placement Guide</h1>
+  <nav><a href="#stations">Stationen</a><a href="#missing">Fehlend</a><a href="#route">Route</a><a href="#intro">Intro</a><a href="#changelog">Changelog</a></nav>
+  <input id="q" type="search" placeholder="Suchen: Typ, System, Station, Fraktion…" aria-label="Suche">
+  <div class="chips" role="group" aria-label="Filter nach Gefährlichkeit">
+    <button data-f="all" aria-pressed="true">Alle</button>
+    <button data-f="red" aria-pressed="false">Kickout</button>
+    <button data-f="orange" aria-pressed="false">Vorsicht</button>
+    <button data-f="green" aria-pressed="false">Sicher</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+<section id="stations">
+  <h2>Stationstypen (<span id="count"></span>)</h2>
+  <p class="meta"><span class="kick">KICKOUT</span> = Undock-Runway so kurz, dass man nach dem Abdocken kaum Zeit zum Redocken hat – und beim Cyno-Sprung wenig Platz für die Landesphäre. <b style="color:var(--red)">rot</b> Kickout · <b style="color:var(--orange)">orange</b> Vorsicht · <b style="color:var(--green)">grün</b> sicher (Einstufung nach <a href="https://jambeeno.com/sta">Jambe's Kickout Station Guide</a>). km = Docking-/Undock-Runway. „Original Guide“ = Seite im <a href="http://go-dl.eve-files.com/media/1105/Stations_undock_range.pdf">Station-Undock-Range-Guide</a>. Karte anklicken für Screenshots.</p>
+  <div class="tools">
+    <button data-view="list" aria-pressed="true">Karten</button><button data-view="tableView" aria-pressed="false">Tabelle</button>
+    <button id="openAll">Alle aufklappen</button><button id="closeAll">Alle zuklappen</button>
+  </div>
+  <div id="list"></div>
+  <div id="tableView" class="tbl" hidden><table>
+    <thead><tr><th><button data-k="name">Stationstyp</button></th><th><button data-k="range">Runway km</button></th><th><button data-k="r">Einstufung</button></th><th><button data-k="undock">Undock</button></th><th><button data-k="faction">Fraktion</button></th><th>Beispiel</th></tr></thead>
+    <tbody id="tblBody"></tbody>
+  </table></div>
+  <p id="none" class="empty" hidden>Keine Treffer.</p>
+</section>
+
+<section id="missing">
+  <h2>Fehlende Stationstypen – müssen nachgereicht werden</h2>
+  <p class="meta">Abgleich mit dem EVE Static Data Export (Stand 2026-11-01): Stationstypen, die aktuell von NPC-Stationen genutzt werden, aber im Guide fehlen. „Beispiel“ ist die Station mit dem höchsten Sec-Status. Nachgereichte Typen in <code>STATIONS</code> eintragen und hier aus <code>MISSING</code> entfernen.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Typ-ID</th><th>Stationstyp</th><th>Anzahl</th><th>Runway (Jambe)</th><th>Beispiel</th><th>Hinweis</th></tr></thead>
+    <tbody id="missingBody"></tbody>
+  </table></div>
+</section>
+
+<section id="route" class="route">
+  <h2>Grand-Tour-Route</h2>
+  <p class="meta">Zahlen in Klammern = Gate-Jumps des Cyno-Alts. Jeder Schritt liegt innerhalb von 10 LJ (Jump Drive Calibration IV). Hinweis: Im selben System wie der Cyno kann man nicht springen – bei mehreren Stationen in einem System erst per Gate ins Nachbarsystem.</p>
+  <h3>Circuit 1 – Start in Jita</h3>
+  <div id="c1"></div>
+  <h3>Circuit 2 – Start in Jita</h3>
+  <div id="c2"></div>
+  <h3>Circuit 3</h3>
+  <p>Von Deven mit dem Cyno-Pilot 4 Jumps nach Tannolen, JF nach Tannolen springen.</p><div id="c3a"></div>
+  <p>Von Hakonen 11 Jumps nach Hirri, JF nach Hirri springen.</p><div id="c3b"></div>
+  <p>Von Avaux 14 Jumps nach Allipes, JF nach Allipes springen.</p><div id="c3c"></div>
+</section>
+
+<section id="intro">
+  <h2>Intro (nach dem Original von Larenon en Marland)</h2>
+  <p>Wer Jump Freighter fliegt, wird früher oder später gegankt – aber das Risiko durch eigene Fehler lässt sich klein halten. Dieser Guide zeigt mit Bildern für jeden NPC-Stationstyp eine Stelle, an der man einen Cyno sicher zünden kann und der ankommende JF trotzdem sofort docken kann. Die Stationstypen wurden über den EVE-Datendump ermittelt, für jeden Typ wurde eine passende Station ausgewählt und auf Singularity geübt: je 4 Sprünge zu roten, 2 zu orangen und 1 zu grünen Stationen.</p>
+  <p>Es sind 30 Typen aufgeführt, aber Caldari Military Station und Caldari Mining Station haben dasselbe Modell – es gibt also nur 29 verschiedene. Zu jeder Station gibt es einen Screenshot der tatsächlichen Cyno-Position. Bei den roten Stationen (außer der Amarr Industrial Station) zeigt ein zweites Bild den JF nach einem Sprung ungefähr am äußersten Punkt der 5-km-Cyno-Blase – auch das war noch ein Spot, an dem man sofort docken konnte (0 m).</p>
+  <p><b>Warum ist das wichtig?</b> Cyno zu weit weg: Man muss im JF ein paar Kilometer zur Station kriechen und wird vorher abgeschossen. Cyno zu nah: Man prallt an der Station ab – teils mit bis zu 1000 m/s – und ist leichte Beute. Wie „böse“ eine Station ist, hängt von Docking-Radius und Geometrie ab; viele abstehende Antennen sind schlecht. Pflichtlektüre vor dem ersten Live-Sprung: <a href="http://www.evealtruist.com/2012/04/how-to-move-capital-ship.html">How to move a capital ship</a>.</p>
+  <p>Wichtig: Man kann nicht zu einem Cyno im selben System springen. Für die Tour empfiehlt der Autor rund 15 000 Liquid Ozone und reichlich JF-Treibstoff (z. B. Helium-Isotope für eine Ark), dann schafft man alle Circuits am Stück. Feedback und bessere Cyno-Spots an Larenon en Marland (ingame).</p>
+  <p class="meta">Quelle: <a href="https://eve-files.com/media/corp/taucabalander/station_cyno_placement_guide.pdf">station_cyno_placement_guide.pdf</a> · Kickout-Einstufung und Undock-Richtung: <a href="https://jambeeno.com/sta">Jambe's EVE Kickout Station Guide</a></p>
+</section>
+
+<section id="changelog">
+  <h2>Changelog</h2>
+  <div id="log"></div>
+</section>
+</main>
+<dialog id="lb"><img alt=""><p></p></dialog>
+<footer class="wrap">EVE Online und alle zugehörigen Inhalte sind Eigentum von CCP hf. Screenshots aus dem Originalguide.</footer>
+
+<script>
+// Neue Einträge oben anfügen.
+const CHANGELOG = [
+  {date: "2026-11-01", text: "Vollbildansicht für Screenshots, Tabellenansicht (sortierbar), Intro auf Deutsch. Online über GitHub Pages."},
+  {date: "2026-11-01", text: "Kompakte, aufklappbare Karten. Kickout-Stationen markiert und filterbar, Undock-Richtung ergänzt (Quelle: Jambe's Kickout Station Guide). Caldari Military Station laut Jambe 20 statt 17,5 km."},
+  {date: "2026-11-01", text: "PDF als Website umgesetzt: Suche, Filter, Route, Liste fehlender Stationstypen (SDE-Abgleich). Alle 30 Beispielstationen existieren noch mit gleichem Typ."},
+];
+
+// r: red/orange/green, range in km, guide: Seite im Undock-Range-Guide, circuit: Tour, pages: PDF-Seiten (Bilder img/pXX_0 = Thumb, pXX_1 = Screenshot)
+const STATIONS = [
+  {id:1928, name:"Amarr Industrial Station", faction:"Amarr", range:2, r:"red", guide:1, ex:"Siseide VII - Moon 17 - Joint Harvesting Food Packaging", circuit:1, pages:[5]},
+  {id:1930, name:"Amarr Mining Station", faction:"Amarr", range:20, r:"green", guide:10, ex:"Deven V - Moon 16 - Ducia Foundry Mining Outpost", circuit:2, pages:[6]},
+  {id:1931, name:"Amarr Research Station", faction:"Amarr", range:30, r:"green", guide:11, ex:"Iesa IV - 24th Imperial Crusade Testing Facilities", circuit:1, pages:[7]},
+  {id:1929, name:"Amarr Standard Station", faction:"Amarr", range:12.5, r:"orange", guide:6, ex:"Sahtogas IV - Moon 2 - Amarr Navy Logistic Support", circuit:1, pages:[8]},
+  {id:1926, name:"Amarr Station Hub", faction:"Amarr", range:40, r:"green", guide:12, ex:"Uusanen IV - Moon 1 - Ministry of Assessment Information Center", circuit:1, pages:[9]},
+  {id:1927, name:"Amarr Station Military", faction:"Amarr", range:40, r:"green", ex:"Kamela V - 24th Imperial Crusade Logistic Support", circuit:1, pages:[10]},
+  {id:1932, name:"Amarr Trade Post", faction:"Amarr", range:15, r:"orange", ex:"Sosan II - Emperor Family Academy", circuit:1, pages:[11]},
+  {id:1529, name:"Caldari Administrative Station", alt:"Station Caldari 1", faction:"Caldari", range:40, r:"green", guide:13, ex:"Hasmijaala X - Moon 3 - Expert Housing Production Plant", circuit:2, pages:[12]},
+  {id:4024, name:"Caldari Food Processing Plant Station", faction:"Caldari", range:25, r:"green", guide:17, ex:"Hasmijaala X - Moon 1 - Poksu Mineral Group Refinery", circuit:2, pages:[13]},
+  {id:54, name:"Caldari Logistics Station", alt:"Station Caldari 4", faction:"Caldari", range:10, r:"orange", ex:"Crielere I - Ishukone Corporation Research Center", circuit:1, pages:[14,15]},
+  {id:3872, name:"Caldari Military Station", alt:"Station Caldari 6", faction:"Caldari", range:17.5, r:"green", guide:16, ex:"Hakonen IX - Moon 10 - Caldari Business Tribunal Information Center", circuit:3, pages:[16], note:"Laut Jambe getestet: 20 km wie die Caldari Mining Station (gleiches Modell)."},
+  {id:4023, name:"Caldari Mining Station", alt:"Gleiches Modell wie Caldari Military Station", faction:"Caldari", range:20, r:"green", guide:18, ex:"Hasmijaala VIII - Moon 4 - Minedrill Mineral Reserve", circuit:2, pages:[17]},
+  {id:1530, name:"Caldari Research Station", alt:"Station Caldari 2", faction:"Caldari", range:20, r:"green", guide:14, ex:"Sujarento IV - State Protectorate Logistic Support", circuit:2, pages:[18]},
+  {id:3871, name:"Caldari Station Hub", alt:"Station Caldari 5", faction:"Caldari", range:10, r:"orange", guide:7, ex:"Namaili V - Moon 7 - Caldari Business Tribunal Law School", circuit:3, pages:[19]},
+  {id:1531, name:"Caldari Trading Station", alt:"Station Caldari 3", faction:"Caldari", range:40, r:"green", guide:15, ex:"Hakisalki VIII - Moon 1 - Nugoeihuvi Corporation Development Studio", circuit:1, pages:[20]},
+  {id:3868, name:"Gallente Administrative Station", alt:"Station Gallente 6", faction:"Gallente", range:12.5, r:"orange", guide:9, ex:"Lamadent I - Federation Customs Logistic Support", circuit:1, pages:[21,22]},
+  {id:3867, name:"Gallente Industrial Station", alt:"Station Gallente 5", faction:"Gallente", range:5, r:"red", guide:2, ex:"Rancer IV - Moon 18 - Roden Shipyards Factory", circuit:1, pages:[23,24]},
+  {id:3869, name:"Gallente Logistics Station", alt:"Station Gallente 7", faction:"Gallente", range:25, r:"green", guide:20, ex:"Thelan VI - Moon 8 - Federation Customs Testing Facilities", circuit:1, pages:[25]},
+  {id:56, name:"Gallente Military Station", alt:"Station Gallente 1", faction:"Gallente", range:25, r:"green", ex:"Rancer V - Moon 7 - Egonics Inc. Development Studio", circuit:1, pages:[26]},
+  {id:3870, name:"Gallente Mining Station", alt:"Station Gallente 8", faction:"Gallente", range:25, r:"green", guide:21, ex:"Rancer VI - Moon 3 - Federal Freight Storage", circuit:1, pages:[27]},
+  {id:3865, name:"Gallente Research Station", alt:"Station Gallente 3", faction:"Gallente", range:40, r:"green", guide:19, ex:"Kourmonen V - Moon 4 - X-Sense Chemical Refinery", circuit:1, pages:[28]},
+  {id:57, name:"Gallente Station Hub", alt:"Station Gallente 2", faction:"Gallente", range:30, r:"green", ex:"Rancer VI - Moon 6 - Federal Navy Academy", circuit:1, pages:[29]},
+  {id:3866, name:"Gallente Trading Hub", alt:"Station Gallente 4", faction:"Gallente", range:15, r:"orange", guide:8, ex:"Avaux VIII - Moon 3 - Combined Harvest Food Packaging", circuit:3, pages:[30]},
+  {id:2496, name:"Minmatar Hub", faction:"Minmatar", range:5, r:"red", guide:5, ex:"Arifsdald III - Moon 14 - The Leisure Group Development Studio", circuit:1, pages:[31,32]},
+  {id:2497, name:"Minmatar Industrial Station", faction:"Minmatar", range:20, r:"green", ex:"Hagilur V - Moon 8 - Boundless Creation Factory", circuit:1, pages:[33]},
+  {id:2498, name:"Minmatar Military Station", faction:"Minmatar", range:15, r:"orange", ex:"Dudreda V - Moon 3 - Republic Fleet Assembly Plant", circuit:1, pages:[34]},
+  {id:2499, name:"Minmatar Mining Station", faction:"Minmatar", range:50, r:"green", guide:21, ex:"Hagilur IV - Moon 2 - Minmatar Mining Corporation Mining Outpost", circuit:1, pages:[35]},
+  {id:2500, name:"Minmatar Research Station", faction:"Minmatar", range:3, r:"red", guide:3, ex:"Dudreda VI - Moon 4 - Republic Military School", circuit:1, pages:[36,37]},
+  {id:2501, name:"Minmatar Station", faction:"Minmatar", range:3, r:"red", guide:4, ex:"Hakisalki VIII - Moon 23 - Republic Fleet Logistic Support", circuit:1, pages:[38,39]},
+  {id:2502, name:"Minmatar Trade Post", faction:"Minmatar", range:5, r:"red", ex:"Hakisalki X - Republic Parliament Academy", circuit:1, pages:[40,41]},
+];
+
+// Aus SDE (staStations, Stand 2026-11-01): genutzte Stationstypen, die oben fehlen.
+const MISSING = [
+  {id:52678, name:"Jita Trade Hub", n:1, run:"34 km, sicher", ex:"Jita 4 - Moon 4 - Caldari Navy Assembly Plant", note:"Jita 4-4 – höchste Priorität. Einzige Station mit mehreren Undocks."},
+  {id:71361, name:"Paragon Fulfilment Center", n:12, run:"18 km, sicher", ex:"Manifest 4 - Moon 5 - Paragon Fulfillment Center", note:""},
+  {id:59956, name:"Association for Interdisciplinary Research Outpost", n:24, ex:"Mettle 4 - AIR Laboratories", note:""},
+  {id:92885, name:"AIR Trade Center", n:1, ex:"Manifest 5 - AIR Laboratories Trade Center", note:""},
+  {id:29323, name:"Ishukone Corporation Headquarters", n:1, ex:"Malkalen 5 - Moon 1 - Ishukone Corporation Factory", note:""},
+  {id:9868, name:"Concord Starbase", n:1, ex:"Yulai IX (Kjarval) - CONCORD Bureau", note:""},
+  {id:29387, name:"Repaired Amarr Station Hub", n:2, ex:"Andrub 2 - Moon 1 - Ministry of War Bureau Offices", note:""},
+  {id:29388, name:"Repaired Amarr Military Station", n:2, ex:"Nishah 7 - Moon 5 - Emperor Family Treasury", note:""},
+  {id:29389, name:"Repaired Amarr Trading Post", n:2, ex:"Kor-Azor Prime 4 - Moon 1 - Kor-Azor Family Bureau", note:""},
+  {id:74397, name:"Minmatar Trade Post (Damaged)", n:1, ex:"Turnur 1 - Republic Parliament Bureau (Damaged)", note:"Evtl. gleiche Geometrie wie Minmatar Trade Post – prüfen."},
+  {id:10795, name:"Jovian Construct", n:2, ex:"HD3-JK 1 - Academy of Aggressive Behaviour", note:"Nullsec."},
+  {id:34325, name:"Sisters of EVE Logistics Station", n:2, run:"25 km, sicher", ex:"Thera 12 - The Sanctuary Institute of Paleocybernetics", note:"Gleiches Modell wie Gallente Logistics Station. Thera (Wurmloch) – kein Cyno möglich, vermutlich irrelevant."},
+  {id:34326, name:"Sisters of EVE Industrial Station", n:2, run:"5 km, KICKOUT", ex:"Thera 12 - The Sanctuary Surveillance Observatory", note:"Gleiches Modell wie Gallente Industrial Station. Thera (Wurmloch) – kein Cyno möglich, vermutlich irrelevant."},
+  {id:78334, name:"Ancient Jovian Outpost", n:1, ex:"Zarzakh - Deathless Custodians - The Fulcrum", note:"Zarzakh – Cyno-Regeln prüfen, evtl. irrelevant."},
+];
+
+const ROUTE = {
+  c1:[["(6)"],["Rancer IV - Moon 18 - Roden Shipyards Factory","Rancer V - Moon 7 - Egonics Inc. Development Studio","Rancer VI - Moon 3 - Federal Freight Storage","Rancer VI - Moon 6 - Federal Navy Academy"],["(1)"],["Crielere I - Ishukone Corporation Research Center"],["(3)"],["Lamadent I - Federation Customs Logistic Support"],["(2)"],["Thelan VI - Moon 8 - Federation Customs Testing Facilities"],["(1)"],["Hagilur IV - Moon 2 - Minmatar Mining Corporation Mining Outpost","Hagilur V - Moon 8 - Boundless Creation Factory"],["(2)"],["Arifsdald III - Moon 14 - The Leisure Group Development Studio"],["(1)"],["Dudreda V - Moon 3 - Republic Fleet Assembly Plant","Dudreda VI - Moon 4 - Republic Military School"],["(1)"],["Hakisalki VIII - Moon 1 - Nugoeihuvi Corporation Development Studio","Hakisalki VIII - Moon 23 - Republic Fleet Logistic Support","Hakisalki X - Republic Parliament Academy"],["(9)"],["Siseide VII - Moon 17 - Joint Harvesting Food Packaging"],["(2)"],["Kourmonen V - Moon 4 - X-Sense Chemical Refinery"],["(1)"],["Kamela V - 24th Imperial Crusade Logistic Support"],["(2)"],["Uusanen IV - Moon 1 - Ministry of Assessment Information Center"],["(1)"],["Iesa IV - 24th Imperial Crusade Testing Facilities"],["(3)"],["Sahtogas IV - Moon 2 - Amarr Navy Logistic Support"],["(2)"],["Sosan II - Emperor Family Academy"]],
+  c2:[["(5)"],["Sujarento IV - State Protectorate Logistic Support"],["(2)"],["Hasmijaala VIII - Moon 4 - Minedrill Mineral Reserve","Hasmijaala X - Moon 1 - Poksu Mineral Group Refinery","Hasmijaala X - Moon 3 - Expert Housing Production Plant"],["(2)"],["Deven V - Moon 16 - Ducia Foundry Mining Outpost"]],
+  c3a:[["(11)"],["Hakonen IX - Moon 10 - Caldari Business Tribunal Information Center"]],
+  c3b:[["(11)"],["Avaux VIII - Moon 3 - Combined Harvest Food Packaging"]],
+  c3c:[["(16)"],["Namaili V - Moon 7 - Caldari Business Tribunal Law School"]],
+};
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pad = n => String(n).padStart(2, "0");
+const RL = {red:"Kickout", orange:"Vorsicht", green:"Sicher"};
+// Undock-Richtung laut Jambe's Kickout Station Guide, alle übrigen horizontal.
+const UNDOCK = {1928:"unten", 1929:"unten", 1932:"unten", 1930:"unten", 56:"unten", 1931:"unten", 1927:"unten", 1926:"oben"};
+
+document.getElementById("list").innerHTML = STATIONS.map(s => `
+  <details class="card" data-r="${s.r}" id="t${s.id}" data-text="${esc([s.name, s.alt, s.faction, s.ex, s.id, RL[s.r], s.r === "red" ? "kick-out" : ""].join(" ").toLowerCase())}">
+    <summary>
+      <img src="img/p${pad(s.pages[0])}_0.jpg" alt="" loading="lazy">
+      <div>
+        <h3>${esc(s.name)} <span class="badge">${s.range.toLocaleString("de")} km</span> ${s.r === "red" ? '<span class="kick">KICKOUT</span>' : ""}</h3>
+        <div class="meta">${esc(s.ex)}</div>
+      </div>
+    </summary>
+    <div class="body">
+      <div class="meta">${s.alt ? esc(s.alt) + " · " : ""}${s.faction} · Typ-ID ${s.id} · Einstufung: <b>${RL[s.r]}</b> · Undock: ${UNDOCK[s.id] || "horizontal"}${s.guide ? " · Original Guide S. " + s.guide : ""} · Circuit ${s.circuit}</div>
+      ${s.note ? `<div class="meta">Hinweis: <b>${esc(s.note)}</b></div>` : ""}
+      <div class="shots">${s.pages.map((p, i) => `<a href="img/p${pad(p)}_1.jpg" target="_blank"><img src="img/p${pad(p)}_1.jpg" alt="${esc(s.name)} – ${i ? "JF nach dem Sprung" : "Cyno-Position"}" loading="lazy"></a>`).join("")}</div>
+    </div>
+  </details>`).join("");
+
+const ORDER = {red:0, orange:1, green:2};
+const undock = s => UNDOCK[s.id] || "horizontal";
+const tbody = document.getElementById("tblBody");
+tbody.innerHTML = STATIONS.map(s => `
+  <tr data-id="${s.id}" data-r="${s.r}" data-text="${document.getElementById("t" + s.id).dataset.text}">
+    <td><a href="#t${s.id}">${esc(s.name)}</a></td><td>${s.range.toLocaleString("de")}</td>
+    <td>${s.r === "red" ? '<span class="kick">KICKOUT</span>' : RL[s.r]}</td><td>${undock(s)}</td><td>${s.faction}</td><td>${esc(s.ex)}</td>
+  </tr>`).join("");
+let sortKey = null, sortDir = 1;
+for (const b of document.querySelectorAll("th button")) b.onclick = () => {
+  sortDir = sortKey === b.dataset.k ? -sortDir : 1; sortKey = b.dataset.k;
+  const val = s => sortKey === "r" ? ORDER[s.r] : sortKey === "undock" ? undock(s) : s[sortKey];
+  const sorted = [...STATIONS].sort((a, c) => (val(a) > val(c) ? 1 : val(a) < val(c) ? -1 : 0) * sortDir);
+  for (const s of sorted) tbody.append(tbody.querySelector(`tr[data-id="${s.id}"]`));
+};
+const showView = id => {
+  for (const b of document.querySelectorAll("[data-view]")) {
+    b.setAttribute("aria-pressed", b.dataset.view === id);
+    document.getElementById(b.dataset.view).hidden = b.dataset.view !== id;
+  }
+  document.getElementById("openAll").hidden = document.getElementById("closeAll").hidden = id !== "list";
+};
+for (const b of document.querySelectorAll("[data-view]")) b.onclick = () => showView(b.dataset.view);
+// Klick auf einen Namen in der Tabelle wechselt zur Karte.
+tbody.addEventListener("click", e => { if (e.target.closest("a")) showView("list"); });
+
+const lb = document.getElementById("lb");
+document.getElementById("list").addEventListener("click", e => {
+  const a = e.target.closest(".shots a");
+  if (!a) return;
+  e.preventDefault();
+  lb.querySelector("img").src = a.href;
+  lb.querySelector("p").textContent = a.querySelector("img").alt;
+  lb.showModal();
+});
+lb.onclick = () => lb.close();
+
+document.getElementById("openAll").onclick = () => document.querySelectorAll(".card:not([hidden])").forEach(d => d.open = true);
+document.getElementById("closeAll").onclick = () => document.querySelectorAll(".card").forEach(d => d.open = false);
+// Sprung von der Route auf eine Station klappt deren Karte auf.
+const openFromHash = () => { if (/^#t\d+$/.test(location.hash)) document.querySelector(location.hash).open = true; };
+addEventListener("hashchange", openFromHash);
+openFromHash();
+
+document.getElementById("missingBody").innerHTML = MISSING.map(m =>
+  `<tr data-text="${esc([m.name, m.ex, m.note, m.id, m.run].join(" ").toLowerCase())}"><td>${m.id}</td><td>${esc(m.name)}</td><td>${m.n}</td><td>${esc(m.run || "?")}</td><td>${esc(m.ex)}</td><td>${esc(m.note)}</td></tr>`).join("");
+
+for (const [k, steps] of Object.entries(ROUTE))
+  document.getElementById(k).innerHTML = steps.map(st => st[0].startsWith("(")
+    ? `<p class="jumps">${st[0]} Jumps</p>`
+    : st.map(n => `<p><a href="#t${STATIONS.find(s => s.ex === n).id}">${esc(n)}</a></p>`).join("")).join("");
+
+document.getElementById("log").innerHTML = CHANGELOG.map(c =>
+  `<p><b>${c.date}</b> – ${esc(c.text)}</p>`).join("");
+
+let filter = "all";
+const q = document.getElementById("q");
+function apply() {
+  const terms = q.value.toLowerCase().split(/\s+/).filter(Boolean);
+  const match = el => terms.every(t => el.dataset.text.includes(t));
+  let n = 0;
+  for (const el of document.querySelectorAll(".card")) {
+    const show = match(el) && (filter === "all" || el.dataset.r === filter);
+    el.hidden = !show; n += show;
+  }
+  for (const el of document.querySelectorAll("#tblBody tr")) el.hidden = !(match(el) && (filter === "all" || el.dataset.r === filter));
+  for (const el of document.querySelectorAll("#missingBody tr")) el.hidden = !match(el);
+  document.getElementById("count").textContent = n === STATIONS.length ? n : `${n} von ${STATIONS.length}`;
+  document.getElementById("none").hidden = n > 0;
+}
+q.addEventListener("input", () => {
+  apply();
+  history.replaceState(null, "", q.value ? "#q=" + encodeURIComponent(q.value) : location.pathname);
+});
+for (const b of document.querySelectorAll(".chips button")) b.onclick = () => {
+  filter = b.dataset.f;
+  document.querySelectorAll(".chips button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  apply();
+};
+if (location.hash.startsWith("#q=")) q.value = decodeURIComponent(location.hash.slice(3));
+apply();
+</script>
+</body>
+</html>
